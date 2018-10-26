@@ -1,0 +1,11 @@
+--- CMakeLists.txt.orig	2016-04-05 02:30:11 UTC
++++ CMakeLists.txt
+@@ -893,7 +893,7 @@ INSTALL(
+     FILES
+         "${CMAKE_CURRENT_BINARY_DIR}/lib${CPACK_PACKAGE_NAME}.pc"
+     DESTINATION
+-        "lib${LIB_SUFFIX}/pkgconfig"
++        "libdata/pkgconfig"
+ )
+ 
+ # Rebuild config.h if ver.txt has changed.

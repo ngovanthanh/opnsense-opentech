@@ -1,0 +1,20 @@
+--- chrome/browser/BUILD.gn.orig	2017-03-09 20:04:27 UTC
++++ chrome/browser/BUILD.gn
+@@ -2177,7 +2177,7 @@ split_static_library("browser") {
+     deps += [ "//device/udev_linux" ]
+   }
+ 
+-  if (is_linux && !is_chromeos) {
++  if ((is_linux || is_bsd) && !is_chromeos) {
+     deps += [ "//third_party/speech-dispatcher" ]
+   }
+ 
+@@ -3559,7 +3559,7 @@ split_static_library("browser") {
+     }
+   }
+ 
+-  if (is_linux) {
++  if (is_linux || is_bsd) {
+     if (use_aura) {
+       deps += [ "//build/linux:fontconfig" ]
+       if (use_dbus) {

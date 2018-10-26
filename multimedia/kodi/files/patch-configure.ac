@@ -1,0 +1,135 @@
+--- configure.ac.orig	2016-02-20 15:21:19 UTC
++++ configure.ac
+@@ -599,11 +599,13 @@ case $host in
+      target_platform=target_linux
+      ARCH="x86-freebsd"
+      MAKE="gmake"
++     USE_STATIC_FFMPEG=1
+      ;;
+   amd64-*-freebsd*)
+      target_platform=target_linux
+      ARCH="x86_64-freebsd"
+      MAKE="gmake"
++     USE_STATIC_FFMPEG=1
+      ;;
+   arm-apple-darwin*)
+      use_joystick=no
+@@ -777,10 +779,16 @@ fi
+ # platform specific flags
+ if echo "$ARCH" | grep -q "freebsd" ; then
+   LOCALBASE="${LOCALBASE:-/usr/local}"
+-  CFLAGS="$CFLAGS -I$LOCALBASE/include"
+-  CXXFLAGS="$CXXFLAGS -I$LOCALBASE/include"
+-  CPPFLAGS="$CPPFLAGS -I$LOCALBASE/include"
++  CFLAGS="$CFLAGS -idirafter$LOCALBASE/include"
++  CXXFLAGS="$CXXFLAGS -idirafter$LOCALBASE/include"
++  CPPFLAGS="$CPPFLAGS -idirafter$LOCALBASE/include"
+   LDFLAGS="$LDFLAGS -L$LOCALBASE/lib"
++  CC_FOR_BUILD="$CC"
++  CXX_FOR_BUILD="$CXX"
++  CFLAGS_FOR_BUILD="$CFLAGS"
++  CXXFLAGS_FOR_BUILD="$CXXFLAGS"
++  LDFLAGS_FOR_BUILD="$LDFLAGS"
++  FFMPEG_OPTS="--cc=$CC --cxx=$CXX"
+ fi
+ if test "$host_vendor" = "apple" ; then
+   # standard application paths
+@@ -913,6 +921,7 @@ AC_LANG_POP([C++])
+ 
+ # Check inotify availability
+ AC_CHECK_HEADER([sys/inotify.h], AC_DEFINE([HAVE_INOTIFY],[1],[Define if we have inotify]),)
++AC_CHECK_LIB([inotify], [main],,)
+ 
+ # Checks for boost headers using CXX instead of CC
+ AC_LANG_PUSH([C++])
+@@ -1228,12 +1237,13 @@ AS_CASE([x$use_libbluray],
+ )
+ 
+ #Check to see if libs are needed for functions that are often built-in to libc
+-AC_SEARCH_LIBS([iconv_open],iconv,,AC_SEARCH_LIBS([libiconv_open],iconv,,AC_MSG_ERROR($missing_library)))
++AC_CHECK_LIB([iconv],[libiconv_open],,AC_MSG_ERROR($missing_library))
+ AC_SEARCH_LIBS([dlopen],dl)
+ AC_SEARCH_LIBS([clock_gettime],rt)
+ AC_SEARCH_LIBS([dn_expand],  resolv)
+ AC_SEARCH_LIBS([_dn_expand], resolv)
+ AC_SEARCH_LIBS([__dn_expand],resolv)
++AC_SEARCH_LIBS([__atomic_load_8], [atomic])
+ 
+ # platform dependent libraries
+ if test "$host_vendor" = "apple" ; then
+@@ -1654,7 +1664,7 @@ if test "${USE_STATIC_FFMPEG}" = "1"; th
+ 
+   if test "$cross_compiling" != "yes"; then
+     if test "$use_debug" != "yes"; then
+-      FFMPEG_OPTS="-r"
++      FFMPEG_OPTS="${FFMPEG_OPTS} -r"
+     fi
+     if test "$use_optimizations" != "yes"; then
+       FFMPEG_OPTS="${FFMPEG_OPTS} --disable-optimizations"
+@@ -1665,7 +1675,7 @@ if test "${USE_STATIC_FFMPEG}" = "1"; th
+       SAVE_LIBS="$LIBS"
+       # check for system installed ffmpeg. We require minimum versions.
+       PKG_CHECK_MODULES([FFMPEG], [$FFMPEG_LIBNAMES],
+-        [INCLUDES="$INCLUDES $FFMPEG_CFLAGS"; LIBS="$LIBS $FFMPEG_LIBS"; FFMPEG_FOUND="true"],
++        [INCLUDES="$FFMPEG_CFLAGS $INCLUDES"; LIBS="$FFMPEG_LIBS $LIBS"; FFMPEG_FOUND="true"],
+         [FFMPEG_FOUND="false"])
+ 
+       if test "${USE_STATIC_FFMPEG}" = "1" && test "$FFMPEG_FOUND" = "true"; then
+@@ -1692,7 +1702,7 @@ if test "${USE_STATIC_FFMPEG}" = "1"; th
+     elif test "$with_ffmpeg" = "force"; then
+       # always build our ffmpeg
+       AC_MSG_NOTICE("FFmpeg installation forced by user - installing our version")
+-      CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" ${ffmpeg_build}/autobuild.sh ${FFMPEG_OPTS}
++      CC="$CC" CPP="$CPP" CXX="$CXX" CFLAGS="$CFLAGS" CXXFLAGS="$CXXFLAGS" ${ffmpeg_build}/autobuild.sh ${FFMPEG_OPTS} || exit 1
+       export PKG_CONFIG_PATH="${ffmpeg_build}/ffmpeg-install/lib/pkgconfig:$PKG_CONFIG_PATH"
+ 
+     elif test "$with_ffmpeg" != "no"; then
+@@ -1705,7 +1715,7 @@ fi
+ 
+ if test "$FFMPEG_FOUND" != "true"; then
+   PKG_CHECK_MODULES([FFMPEG], [$FFMPEG_LIBNAMES],
+-    [INCLUDES="$INCLUDES $FFMPEG_CFLAGS"; LIBS="$LIBS $FFMPEG_LIBS"; FFMPEG_FOUND="true"], 
++    [INCLUDES="$FFMPEG_CFLAGS $INCLUDES"; LIBS="$FFMPEG_LIBS $LIBS"; FFMPEG_FOUND="true"], 
+     [AC_MSG_ERROR("ffmpeg not found")])
+ fi
+ 
+@@ -1731,9 +1741,9 @@ fi
+ echo "Checking for SWIG installation"
+ AC_PATH_PROG(SWIG_EXE, swig, "none")
+ if test "$SWIG_EXE" = "none"; then
+-  AC_PATH_PROG(SWIG20_EXE, swig2.0, "none")
+-  if test "$SWIG20_EXE" != "none" ; then
+-    SWIG_EXE=$SWIG20_EXE
++  AC_PATH_PROG(SWIG30_EXE, swig3.0, "none")
++  if test "$SWIG30_EXE" != "none" ; then
++    SWIG_EXE=$SWIG30_EXE
+   fi
+ fi
+ if test "$SWIG_EXE" = "none"; then
+@@ -2065,7 +2075,7 @@ fi
+ # we don't compile with default upstream squish, so we use our own one
+ # even on non unified deps platforms
+ if test "$cross_compiling" != "yes"; then
+-  make -C ${abs_top_srcdir}/tools/depends/native/libsquish-native CXX=${CXX}
++  $MAKE -C ${abs_top_srcdir}/tools/depends/native/libsquish-native CXX=${CXX}
+   export PKG_CONFIG_PATH="${abs_top_srcdir}/tools/depends/native/libsquish-native/squish-install/lib/pkgconfig:$PKG_CONFIG_PATH"
+ fi
+ PKG_CHECK_MODULES([SQUISH], [squish],
+@@ -2076,7 +2086,7 @@ if test "x$use_texturepacker" != "xno"; 
+   AC_PATH_PROG([TEXTUREPACKER], [TexturePacker], ["none"],
+     [$PATH$PATH_SEPARATOR${abs_top_srcdir}/tools/depends/native/TexturePacker/bin])
+   if test "$TEXTUREPACKER" = "none"; then
+-    make -C ${abs_top_srcdir}/tools/depends/native/TexturePacker
++    $MAKE -C ${abs_top_srcdir}/tools/depends/native/TexturePacker
+     TEXTUREPACKER="${abs_top_srcdir}/tools/depends/native/TexturePacker/bin/TexturePacker"
+   fi
+   if test -x "$TEXTUREPACKER"; then
+@@ -2346,6 +2356,8 @@ if test "$host_vendor" = "apple" ; then
+   LIBS="$LIBS -L\$(abs_top_srcdir)/lib/ffmpeg/libswscale -lswscale"
+ fi
+ 
++LIBS=$(echo "$LIBS" | tr "\n" " ")
++
+ OUTPUT_FILES="Makefile \
+     Makefile.include \
+     addons/skin.confluence/media/Makefile \

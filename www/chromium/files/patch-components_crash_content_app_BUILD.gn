@@ -1,0 +1,11 @@
+--- components/crash/content/app/BUILD.gn.orig	2017-03-09 20:04:31 UTC
++++ components/crash/content/app/BUILD.gn
+@@ -154,7 +154,7 @@ source_set("app_non_mac_win") {
+       "//breakpad:breakpad_handler",
+       "//sandbox",
+     ]
+-  } else if (is_posix && !is_ios) {
++  } else if (is_posix && !is_ios && !is_bsd) {
+     deps += [ "//breakpad:client" ]
+   }
+ }

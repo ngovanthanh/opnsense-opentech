@@ -1,0 +1,11 @@
+--- device/BUILD.gn.orig	2017-03-09 20:04:33 UTC
++++ device/BUILD.gn
+@@ -197,7 +197,7 @@ test("device_unittests") {
+     ]
+   }
+ 
+-  if ((is_chromeos || is_linux) && use_dbus) {
++  if ((is_chromeos || is_linux || is_bsd) && use_dbus) {
+     configs += [ "//build/config/linux/dbus" ]
+ 
+     sources += [

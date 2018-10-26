@@ -1,0 +1,34 @@
+--- src/CMakeLists.txt.orig	2015-05-07 13:21:22 UTC
++++ src/CMakeLists.txt
+@@ -86,7 +86,7 @@ if (UNIX)
+ 	if (APPLE)
+ 		set (MOSQ_LIBS ${MOSQ_LIBS} dl m)
+ 	else (APPLE)
+-		set (MOSQ_LIBS ${MOSQ_LIBS} rt dl m)
++		set (MOSQ_LIBS ${MOSQ_LIBS} rt m)
+ 	endif (APPLE)
+ endif (UNIX)
+ 
+@@ -98,15 +98,6 @@ if (${WITH_WEBSOCKETS} STREQUAL ON)
+ 	set (MOSQ_LIBS ${MOSQ_LIBS} websockets)
+ endif (${WITH_WEBSOCKETS} STREQUAL ON)
+ 
+-# Simple detect libuuid
+-if(NOT APPLE)
+-	FIND_PATH(UUID_HEADER uuid/uuid.h)
+-	if (UUID_HEADER)
+-		add_definitions(-DWITH_UUID)
+-		set (MOSQ_LIBS ${MOSQ_LIBS} uuid)
+-	endif (UUID_HEADER)
+-endif(NOT APPLE)
+-
+ target_link_libraries(mosquitto ${MOSQ_LIBS})
+ 
+ if (UNIX)
+@@ -127,6 +118,5 @@ if (${WITH_TLS} STREQUAL ON)
+ endif (${WITH_TLS} STREQUAL ON)
+ 
+ if (UNIX)
+-	install(CODE "EXEC_PROGRAM(/sbin/ldconfig)")
+ endif (UNIX)
+ 

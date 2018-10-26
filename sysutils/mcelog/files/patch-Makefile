@@ -1,0 +1,54 @@
+--- Makefile.orig	2017-03-29 17:32:02 UTC
++++ Makefile
+@@ -27,14 +27,21 @@ all: mcelog
+ 
+ .PHONY: install clean depend FORCE
+ 
++LIBS :=
+ OBJ := p4.o k8.o mcelog.o dmi.o tsc.o core2.o bitfield.o intel.o \
+        nehalem.o dunnington.o tulsa.o config.o memutil.o msg.o   \
+-       eventloop.o leaky-bucket.o memdb.o server.o trigger.o 	 \
+-       client.o cache.o sysfs.o yellow.o page.o rbtree.o 	 \
++       eventloop.o leaky-bucket.o memdb.o server.o	 	 \
++       client.o cache.o rbtree.o			 	 \
+        sandy-bridge.o ivy-bridge.o haswell.o		 	 \
+        broadwell_de.o broadwell_epex.o skylake_xeon.o		 \
+        denverton.o						 \
+-       msr.o bus.o unknown.o
++       msr.o
++ifndef FREEBSD
++OBJ += page.o trigger.o sysfs.o yellow.o bus.o unknown.o
++endif
++ifdef FREEBSD
++OBJ += memstream.o
++endif
+ CLEAN := mcelog dmi tsc dbquery .depend .depend.X dbquery.o \
+ 	version.o version.c version.tmp
+ DOC := mce.pdf
+@@ -43,7 +50,7 @@ ADD_DEFINES :=
+ 
+ SRC := $(OBJ:.o=.c)
+ 
+-mcelog: ${OBJ} version.o
++mcelog: ${OBJ} ${LIBS} version.o
+ 
+ # dbquery intentionally not installed by default
+ install: mcelog mcelog.conf mcelog.conf.5 mcelog.triggers.5
+@@ -82,7 +89,7 @@ depend: .depend
+ 
+ version.tmp: FORCE
+ 	( printf "char version[] = \"" ; 	\
+-	if command -v git >/dev/null; then 	\
++	if false; then 	\
+ 	if [ -d .git ] ; then 			\
+ 		git describe --tags HEAD | tr -d '\n'; 	\
+ 	else 					\
+@@ -97,8 +104,6 @@ version.c: version.tmp
+ 
+ .depend: ${SRC}
+ 	${CC} -MM -I. ${SRC} > .depend.X && mv .depend.X .depend
+-
+-include .depend
+ 
+ Makefile: .depend
+ 

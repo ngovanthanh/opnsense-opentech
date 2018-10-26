@@ -1,0 +1,20 @@
+--- ui/gfx/BUILD.gn.orig	2017-03-09 20:04:49 UTC
++++ ui/gfx/BUILD.gn
+@@ -375,7 +375,7 @@ component("gfx") {
+   }
+ 
+   # Linux.
+-  if (is_linux) {
++  if (is_linux || is_bsd) {
+     deps += [ "//build/linux:fontconfig" ]
+   }
+ 
+@@ -570,7 +570,7 @@ static_library("test_support") {
+       "test/ui_cocoa_test_helper.mm",
+     ]
+   }
+-  if (is_linux) {
++  if (is_linux || is_bsd) {
+     deps += [ "//build/linux:fontconfig" ]
+   }
+ }

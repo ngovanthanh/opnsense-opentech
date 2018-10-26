@@ -1,0 +1,11 @@
+--- chromecast/browser/BUILD.gn.orig	2017-03-09 20:04:31 UTC
++++ chromecast/browser/BUILD.gn
+@@ -118,7 +118,7 @@ source_set("browser") {
+     "//ui/gl",
+   ]
+ 
+-  if (is_linux) {
++  if (is_linux || is_bsd) {
+     sources += [
+       "cast_content_window_linux.cc",
+       "cast_content_window_linux.h",

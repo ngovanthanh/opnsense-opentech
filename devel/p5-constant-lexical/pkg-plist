@@ -1,0 +1,4 @@
+%%USEXS%%%%SITE_ARCH%%/auto/constant/lexical/lexical.so
+%%USEXS%%%%SITE_ARCH%%/constant/lexical.pm
+%%PERL5_MAN3%%/constant::lexical.3.gz
+%%NOXS%%%%SITE_PERL%%/constant/lexical.pm

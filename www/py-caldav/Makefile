@@ -1,0 +1,18 @@
+# $FreeBSD$
+
+PORTNAME=	caldav
+PORTVERSION=	0.5.0
+CATEGORIES=	www python
+MASTER_SITES=	CHEESESHOP
+PKGNAMEPREFIX=	${PYTHON_PKGNAMEPREFIX}
+
+MAINTAINER=	jrm@FreeBSD.org
+COMMENT=	CalDAV (RFC4791) client library
+
+LICENSE=	APACHE20 GPLv3
+LICENSE_COMB=	dual
+
+USES=		python
+USE_PYTHON=	distutils autoplist
+
+.include <bsd.port.mk>

@@ -1,0 +1,86 @@
+--- net/BUILD.gn.orig	2017-03-09 20:04:35 UTC
++++ net/BUILD.gn
+@@ -82,7 +82,7 @@ if (use_glib && use_gconf && !is_chromeo
+   net_configs += [ "//build/config/linux/gconf" ]
+ }
+ 
+-if (is_linux) {
++if (is_linux && !is_bsd) {
+   net_configs += [ "//build/config/linux:libresolv" ]
+ }
+ 
+@@ -281,6 +281,16 @@ component("net") {
+       sources -= [ "disk_cache/blockfile/file_posix.cc" ]
+     }
+ 
++    if (is_bsd) {
++      sources -= [
++         "base/address_tracker_linux.cc",
++         "base/address_tracker_linux.h",
++         "base/network_change_notifier_linux.cc",
++         "base/network_change_notifier_linux.h",
++         "base/network_interfaces_linux.cc",
++      ]
++    }
++
+     if (is_ios || is_mac) {
+       sources += gypi_values.net_base_mac_ios_sources
+     }
+@@ -962,7 +972,7 @@ if (!is_ios && !is_android) {
+   }
+ }
+ 
+-if (is_linux || is_mac) {
++if (is_linux || is_bsd || is_mac) {
+   executable("cachetool") {
+     testonly = true
+     sources = [
+@@ -991,7 +1001,7 @@ if (is_linux || is_mac) {
+   }
+ }
+ 
+-if (is_linux) {
++if (is_linux || is_bsd) {
+   static_library("epoll_server") {
+     sources = [
+       "tools/epoll_server/epoll_server.cc",
+@@ -1095,7 +1105,7 @@ if (is_android) {
+   }
+ }
+ 
+-if (is_android || is_linux) {
++if (is_android || is_linux || is_bsd) {
+   executable("disk_cache_memory_test") {
+     testonly = true
+     sources = [
+@@ -1276,7 +1286,7 @@ test("net_unittests") {
+     "third_party/nist-pkits/",
+   ]
+ 
+-  if (is_linux || is_mac || is_win) {
++  if (is_linux || is_bsd || is_mac || is_win) {
+     deps += [
+       "//third_party/pyftpdlib/",
+       "//third_party/pywebsocket/",
+@@ -1299,7 +1309,7 @@ test("net_unittests") {
+   if (is_desktop_linux) {
+     deps += [ ":epoll_quic_tools" ]
+   }
+-  if (is_linux) {
++  if (is_linux || is_bsd) {
+     sources += gypi_values.net_linux_test_sources
+     deps += [
+       ":epoll_quic_tools",
+@@ -1319,6 +1329,12 @@ test("net_unittests") {
+     sources -= [ "proxy/proxy_config_service_linux_unittest.cc" ]
+   }
+ 
++  if (is_bsd) {
++    sources -= [
++      "base/address_tracker_linux_unittest.cc",
++    ]
++  }
++
+   if (v8_use_external_startup_data) {
+     deps += [ "//gin" ]
+   }

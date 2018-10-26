@@ -1,0 +1,20 @@
+# Created by: Gasol Wu <gasol.wu@gmail.com>
+# $FreeBSD$
+
+PORTNAME=	jsond
+PORTVERSION=	1.3.0
+PORTREVISION=	1
+CATEGORIES=	devel
+MASTER_SITES=	http://pecl.php.net/get/
+PKGNAMEPREFIX=	pecl-
+DIST_SUBDIR=	PECL
+
+MAINTAINER=	gasol.wu@gmail.com
+COMMENT=	JavaScript Object Notation in PHP
+
+LICENSE=	PHP301
+
+USES=		php:ext tar:tgz
+IGNORE_WITH_PHP=	70
+
+.include <bsd.port.mk>

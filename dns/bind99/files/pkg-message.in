@@ -1,0 +1,15 @@
+**********************************************************************
+*            _  _____ _____ _____ _   _ _____ ___ ___  _   _         *
+*           / \|_   _|_   _| ____| \ | |_   _|_ _/ _ \| \ | |        *
+*          / _ \ | |   | | |  _| |  \| | | |  | | | | |  \| |        *
+*         / ___ \| |   | | | |___| |\  | | |  | | |_| | |\  |        *
+*        /_/   \_\_|   |_| |_____|_| \_| |_| |___\___/|_| \_|        *
+*                                                                    *
+*   BIND requires configuration of rndc, including a "secret" key.   *
+*    The easiest, and most secure way to configure rndc is to run    *
+*   'rndc-confgen -a' to generate the proper conf file, with a new   *
+*            random key, and appropriate file permissions.           *
+*                                                                    *
+*     The %%PREFIX%%/etc/rc.d/named script will do that for you.     *
+*                                                                    *
+**********************************************************************
